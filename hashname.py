@@ -5,7 +5,7 @@ import os
 import sys
 import hashlib
 import argparse
-import string
+import re
 
 BUF_SIZE = 8192
 
@@ -41,6 +41,7 @@ def check_args():
     parser.add_argument(
         '-v',
         '--verbose',
+        default=False,
         action='store_true',
         help='Print more information during processing'
     )
@@ -77,10 +78,7 @@ def get_algorithm(args):
 def is_already_hash(file_name: str, digest_size: int):
     file_name = os.path.splitext(file_name)[0]
 
-    if len(file_name) != digest_size or string.hexdigits in file_name:
-        return False
-
-    return True
+    return bool(re.match('^[a-f0-9]{64}$', file_name))
 
 
 def process(args, algo):

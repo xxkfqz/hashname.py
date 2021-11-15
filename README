@@ -1,4 +1,4 @@
-usage: hashname.py [-h] [-f] [-F] [-a ALGORITHM] [-v] FILE [FILE ...]
+usage: hashname [-h] [-f] [-F] [-a ALGORITHM] [-d] [-v] FILE [FILE ...]
 
 Rename files to their hash
 
@@ -9,7 +9,10 @@ optional arguments:
   -h, --help            show this help message and exit
   -f, --force           Process the file even if it looks like it has already
                         been processed
-  -F, --force-rename    Rename file even there is file with the same hash
+  -F, --force-rename    Rename file even there is another file with the same
+                        result name
   -a ALGORITHM, --algorithm ALGORITHM
-                        Hash algorithm: "md5", "sha256" (default), "sha512"
+                        Set specific hash algorithm: "md5", "sha256"
+                        (default), "sha512"
+  -d, --dry-run         Do not actually rename files
   -v, --verbose         Print more information during processing

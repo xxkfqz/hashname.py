@@ -18,11 +18,11 @@ def check_args():
 
     parser.add_argument(
         '-f',
-        '--force',
+        '--force-rehash',
         action='store_true',
         help='Process the file even if it looks like it has already been processed'
     )
-    
+
     parser.add_argument(
         '-F',
         '--force-rename',
@@ -94,16 +94,15 @@ def process(args, algo):
         hasher = algo()
 
         try:
-            # Is it a directory?
-            if os.path.isdir(input_file):
+            if not os.path.isfile(input_file):
                 if args.verbose:
-                    print(f'"{input_file}" is a directory')
+                    print(f'"{input_file}" is not a file')
                 continue
 
             # Was it already processed?
             path = os.path.split(input_file)
             ext = os.path.splitext(input_file)[-1]
-            if not args.force and is_already_hash(path[-1], len(hasher.hexdigest())):
+            if not args.force_rehash and is_already_hash(path[-1], len(hasher.hexdigest())):
                 if args.verbose:
                     print(f'Skipping "{input_file}"')
                 continue
@@ -116,15 +115,29 @@ def process(args, algo):
                         break
                     hasher.update(chunk)
 
-            out_file = ''.join(path[:-1]) + '/' + hasher.hexdigest() + ext
-            if os.path.isfile(out_file) and not args.force_rename:
-                print(f'"{out_file}" already exists, skipping "{input_file}"')
-            else:
-                if not args.dry_run:
-                    os.rename(input_file, out_file)
-                print(f'"{input_file}" -> "{out_file}"')
+            prepath = ''.join(path[:-1])
+            if prepath:
+                prepath += '/'
+
+            out_file = prepath + hasher.hexdigest() + ext
+
+            if os.path.isfile(out_file):
+                # Just in case
+                input_fsize = os.path.getsize(input_file)
+                output_fsize = os.path.getsize(out_file)
+                if input_fsize == output_fsize:
+                    print(f'DIGEST COLLISION: "{input_file}" ({input_fsize}) / "{out_file}" ({output_fsize})', file=sys.stderr)
+                    continue
+
+                if not args.force_rename:
+                    print(f'"{out_file}" already exists, skipping "{input_file}"')
+                    continue
+
+            if not args.dry_run:
+                os.rename(input_file, out_file)
+            print(f'"{input_file}" -> "{out_file}"')
         except OSError:
-            sys.stderr.write(f'Cannot access to {input_file}\n')
+            sys.stderr.write(f'Cannot read to {input_file}\n')
 
 
 if __name__ == '__main__':

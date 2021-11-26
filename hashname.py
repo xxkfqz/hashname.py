@@ -125,7 +125,7 @@ def process(args, algo):
                 # Just in case
                 input_fsize = os.path.getsize(input_file)
                 output_fsize = os.path.getsize(out_file)
-                if input_fsize == output_fsize:
+                if input_fsize != output_fsize:
                     print(f'DIGEST COLLISION: "{input_file}" ({input_fsize}) / "{out_file}" ({output_fsize})', file=sys.stderr)
                     continue
 
